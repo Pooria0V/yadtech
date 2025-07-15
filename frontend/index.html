@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="فا">
+
+
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>برنامه‌ریز مطالعه پیشرفته</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+
+
+<body>
+
+<div class="navbar">
+  <h2 id="title">برنامه‌ریز مطالعه پیشرفته</h2>
+
+  <div class="navbar-section">
+    <div id="guestButtons">
+      <button id="loginBtn" style="border-radius: 7px; padding: 7px; padding-right: 10px; padding-left: 10px; font-size: 100%;">ورود</button>
+      <button id="signupBtn" style="border-radius: 7px; padding: 7px; padding-right: 10px; padding-left: 10px; font-size: 100%;">ثبت‌نام</button>
+    </div>
+
+    <div id="userInfo" style="display: none;">
+      <span>👤 وارد شده‌اید</span>
+      <button onclick="logout()" class="btn-clear">خروج</button>
+    </div>
+
+    <button onclick="toggleDarkMode()" id="darkModeBtn"  style="border-radius: 7px; padding: 7px; padding-right: 10px; padding-left: 10px; font-size: 100%;">🌙 شب</button>
+  </div>
+
+</div>
+
+
+<!-- ارتباط با ما-->
+<div id="contactModal" class="modal">
+  <div class="modal-content" id="contactContent" style="color: black; background-color: aquamarine; ">
+    <span class="close-btn" onclick="closeModal('contactModal')">&times;</span>
+    <h3>ارتباط با ما</h3>
+    <p><strong>ایمیل:</strong> example@example.com</p>
+    <p><strong>تلگرام:</strong> @pooria_0_0</p>
+    <p><strong>شماره تماس:</strong> +989162809829</p>
+  </div>
+</div>
+
+<!-- ورود اطلاعات بازه مطالعه -->
+<div class="form-fields" style="margin: 20px;">
+  <div>
+    <label for="titleInput">عنوان درس:</label>
+    <input type="text" id="titleInput" placeholder="مثال: ریاضی">
+  </div>
+  <div>
+    <label for="durationInput">مدت مطالعه (دقیقه):</label>
+    <input type="number" id="durationInput" min="1" placeholder="مثلاً 90">
+  </div>
+  <div>
+    <label for="dateInput">تاریخ مطالعه:</label>
+    <input type="date" id="dateInput">
+  </div>
+  <div>
+    <label for="startTimeInput">ساعت شروع:</label>
+    <input type="time" id="startTimeInput">
+  </div>
+  <div style="display: flex; align-items: end;">
+    <!-- <button onclick="addStudySession(event)" id="addBtn">افزودن درس</button> -->
+    <button onclick="addStudySession()" id="addBtn">افزودن درس</button>
+
+  </div>
+</div>
+
+
+
+</div>
+
+<!-- todaySection -->
+<div class="today-section" style="display:none;" id="todaySection">
+  <h3 id="todayTitle">مطالعات امروز</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>✔️</th>
+        <th id="th2Title">عنوان</th>
+        <th id="th2Type">نوع جلسه</th>
+        <th id="th2Start">شروع</th>
+        <th id="th2End">پایان</th>
+        <th id="th2Duration">مدت (دقیقه)</th>
+      </tr>
+    </thead>
+    <tbody id="todaySessionsBody"></tbody>
+  </table>
+  <button class="btn-clear" onclick="clearToday()" id="clearBtn">پاک کردن جلسات امروز</button>
+</div>
+
+<!-- otherdaySection -->
+<table id="allSessionsTable" style="display:none;">
+  <thead>
+    <tr>
+      <th>✔️</th>
+      <th id="thTitle">عنوان</th>
+      <th id="thType">نوع جلسه</th>
+      <th id="thDate">تاریخ</th>
+      <th id="thStart">شروع</th>
+      <th id="thEnd">پایان</th>
+      <th id="thDuration">مدت (دقیقه)</th>
+      <th id="thReview">بازه‌های مرور</th>
+      <th id="thDelete">حذف</th>
+    </tr>
+  </thead>
+  <tbody id="allSessionsBody"></tbody>
+</table>
+
+
+<!-- Login Modal -->
+<div id="loginModal" class="modal">
+  <div class="modal-content" id="loginContent">
+    <span class="close-btn" onclick="closeModal('loginModal')">&times;</span>
+    <h3>ورود به حساب کاربری</h3>
+    <label for="loginUsername">نام کاربری:</label>
+    <input type="text" id="loginUsername" placeholder="ایمیل "/>
+    <label for="loginPassword">رمز عبور:</label>
+    <input type="password" id="loginPassword" placeholder="رمز عبور" />
+    <button onclick="login()">ورود</button>
+  </div>
+</div>
+
+<!-- Signup Modal -->
+<div id="signupModal" class="modal">
+  <div class="modal-content" id="signupContent">
+    <span class="close-btn" onclick="closeModal('signupModal')">&times;</span>
+    <h3>ثبت‌نام کاربر جدید</h3>
+    <label for="signupUsername">نام کاربری:</label>
+    <input type="text" id="signupUsername" placeholder="ایمیل" />
+    <label for="signupPassword">رمز عبور:</label>
+    <input type="password" id="signupPassword" placeholder="رمز" />
+    <button onclick="signup()">ثبت‌نام</button>
+  </div>
+</div>
+
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+  <button id="contact-btn">ارتباط با ما</button>
+</div>
+
+
+<script src="script.js"></script>
+
+</body>
+</html>
