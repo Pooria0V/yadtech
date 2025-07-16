@@ -193,26 +193,47 @@ async function addStudySession() {
 }
 
 // ----------------- تابع کمک‌فرستنده جلسه -----------------
+
 async function sendSessionToAPI(session) {
-  const token = localStorage.getItem("access");
+  let token = localStorage.getItem("access");
   if (!token) return;
 
   try {
-    const response = await fetch("http://127.0.0.1:8000/api/sessions/", {
+    let response = await fetch("http://127.0.0.1:8000/api/sessions/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
+        "Authorization": `Bearer ${token}`,
       },
       body: JSON.stringify(session),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(Object.values(errorData).flat().join(" | "));
+    // اگر توکن منقضی شده بود، سعی کن با refresh یک توکن جدید بگیری
+    if (response.status === 401) {
+      const refreshed = await refreshToken();
+      if (refreshed) {
+        token = localStorage.getItem("access"); // توکن جدید
+        response = await fetch("http://127.0.0.1:8000/api/sessions/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify(session),
+        });
+      } else {
+        alert("نشست شما منقضی شده است. لطفاً دوباره وارد شوید.");
+        return;
+      }
     }
 
-    console.log("✅ جلسه ثبت شد:", await response.json());
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(Object.values(data).flat().join(" | "));
+    }
+
+    console.log("✅ جلسه ثبت شد:", data);
 
   } catch (error) {
     console.error("❌ خطا در ثبت جلسه:", error.message);
@@ -352,6 +373,17 @@ async function refreshToken() {
   } catch {
     return false;
   }
+}
+
+
+function isToday(dateStr) {
+  const today = new Date();
+  const inputDate = new Date(dateStr);
+  return (
+    today.getFullYear() === inputDate.getFullYear() &&
+    today.getMonth() === inputDate.getMonth() &&
+    today.getDate() === inputDate.getDate()
+  );
 }
 
 
