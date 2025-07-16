@@ -181,6 +181,10 @@ async function addStudySession() {
     alert("خطا در ثبت اطلاعات در سرور: " + err.message);
   }
 
+  // بارگذاری مجدد درس‌ها برای نمایش در جدول
+  await loadLessons();
+
+
   // پاک‌سازی
   document.getElementById("titleInput").value = "";
   document.getElementById("durationInput").value = "";
@@ -262,6 +266,95 @@ function logout() {
 }
 
 
+async function loadLessons() {
+  const token = localStorage.getItem("access");
+  if (!token) return;
+
+  try {
+    const res = await fetch("http://127.0.0.1:8000/api/lessons/", {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) {
+      console.error("خطا در دریافت درس‌ها:", await res.text());
+      return;
+    }
+
+    const lessons = await res.json();
+
+    const tbody = document.getElementById("allSessionsBody");
+    tbody.innerHTML = "";  // پاک‌سازی جدول
+
+    lessons.forEach(lesson => {
+      const row = `
+        <tr>
+          <td><input type="checkbox"></td>
+          <td>${lesson.title}</td>
+          <td>مطالعه</td>
+          <td>${lesson.created_at.split("T")[0]}</td>
+          <td>---</td>
+          <td>---</td>
+          <td>${lesson.duration_minutes}</td>
+          <td>${lesson.sessions.length} مرور</td>
+          <td><button class="btn-delete" onclick="this.closest('tr').remove()">حذف</button></td>
+        </tr>
+      `;
+
+      tbody.insertAdjacentHTML("beforeend", row);
+
+      // اضافه کردن مرورها
+      lesson.sessions.forEach((sesh, index) => {
+        const reviewRow = `
+          <tr>
+            <td><input type="checkbox"></td>
+            <td>${lesson.title}</td>
+            <td>مرور ${index + 1}</td>
+            <td>${sesh.date}</td>
+            <td>${sesh.start_time || "---"}</td>
+            <td>${sesh.end_time || "---"}</td>
+            <td>${sesh.duration_minutes}</td>
+            <td>---</td>
+            <td><button class="btn-delete" onclick="this.closest('tr').remove()">حذف</button></td>
+          </tr>
+        `;
+        tbody.insertAdjacentHTML("beforeend", reviewRow);
+      });
+    });
+
+    document.getElementById("allSessionsTable").style.display = "table";
+
+  } catch (err) {
+    console.error("مشکل در ارتباط با سرور:", err);
+  }
+}
+
+
+async function refreshToken() {
+  const refresh = localStorage.getItem("refresh");
+  if (!refresh) return false;
+
+  try {
+    const res = await fetch("http://127.0.0.1:8000/api/token/refresh/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refresh }),
+    });
+
+    if (!res.ok) return false;
+
+    const data = await res.json();
+    localStorage.setItem("access", data.access);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+
 // ----------------- بارگذاری اولیه -----------------
 window.onload = () => {
   // حالت شب/روز
@@ -283,5 +376,10 @@ window.onload = () => {
     document.getElementById("guestButtons").style.display = "flex";
     document.getElementById("userInfo").style.display = "none";
   }
+
+if (localStorage.getItem("access")){
+    loadLessons();  // ✅ نمایش لیست قبلی
+  }
+    
 };
 
