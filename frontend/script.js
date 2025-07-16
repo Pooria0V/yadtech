@@ -286,6 +286,15 @@ function logout() {
   location.reload();  // صفحه رو ریفرش کن که دکمه‌ها آپدیت بشن
 }
 
+function isToday(dateStr) {
+  const today = new Date();
+  const inputDate = new Date(dateStr);
+  return (
+    today.getFullYear() === inputDate.getFullYear() &&
+    today.getMonth() === inputDate.getMonth() &&
+    today.getDate() === inputDate.getDate()
+  );
+}
 
 async function loadLessons() {
   const token = localStorage.getItem("access");
@@ -306,15 +315,23 @@ async function loadLessons() {
     const lessons = await res.json();
 
     const tbody = document.getElementById("allSessionsBody");
-    tbody.innerHTML = "";  // پاک‌سازی جدول
+    tbody.innerHTML = "";
+
+    const todayTbody = document.getElementById("todaySessionsBody");
+    todayTbody.innerHTML = "";
+
+    let todayHasSessions = false;
 
     lessons.forEach(lesson => {
+      const createdDate = lesson.created_at.split("T")[0];
+
+      // اضافه به جدول اصلی
       const row = `
         <tr>
           <td><input type="checkbox"></td>
           <td>${lesson.title}</td>
           <td>مطالعه</td>
-          <td>${lesson.created_at.split("T")[0]}</td>
+          <td>${createdDate}</td>
           <td>---</td>
           <td>---</td>
           <td>${lesson.duration_minutes}</td>
@@ -322,10 +339,25 @@ async function loadLessons() {
           <td><button class="btn-delete" onclick="this.closest('tr').remove()">حذف</button></td>
         </tr>
       `;
-
       tbody.insertAdjacentHTML("beforeend", row);
 
-      // اضافه کردن مرورها
+      // اگر تاریخ ایجاد درس برای امروز باشد، به جدول امروز اضافه کن
+      if (isToday(createdDate)) {
+        const todayRow = `
+          <tr>
+            <td><input type="checkbox"></td>
+            <td>${lesson.title}</td>
+            <td>مطالعه</td>
+            <td>---</td>
+            <td>---</td>
+            <td>${lesson.duration_minutes}</td>
+          </tr>
+        `;
+        todayTbody.insertAdjacentHTML("beforeend", todayRow);
+        todayHasSessions = true;
+      }
+
+      // مرورها
       lesson.sessions.forEach((sesh, index) => {
         const reviewRow = `
           <tr>
@@ -341,10 +373,30 @@ async function loadLessons() {
           </tr>
         `;
         tbody.insertAdjacentHTML("beforeend", reviewRow);
+
+        // اگر تاریخ مرور برای امروز باشد، به جدول امروز اضافه کن
+        if (isToday(sesh.date)) {
+          const todayReviewRow = `
+            <tr>
+              <td><input type="checkbox"></td>
+              <td>${lesson.title}</td>
+              <td>مرور ${index + 1}</td>
+              <td>${sesh.start_time || "---"}</td>
+              <td>${sesh.end_time || "---"}</td>
+              <td>${sesh.duration_minutes}</td>
+            </tr>
+          `;
+          todayTbody.insertAdjacentHTML("beforeend", todayReviewRow);
+          todayHasSessions = true;
+        }
       });
     });
 
     document.getElementById("allSessionsTable").style.display = "table";
+
+    // نمایش جدول "مطالعات امروز" اگر چیزی وجود داشت
+    const todaySection = document.getElementById("todaySection");
+    todaySection.style.display = todayHasSessions ? "block" : "none";
 
   } catch (err) {
     console.error("مشکل در ارتباط با سرور:", err);
@@ -376,15 +428,15 @@ async function refreshToken() {
 }
 
 
-function isToday(dateStr) {
-  const today = new Date();
-  const inputDate = new Date(dateStr);
-  return (
-    today.getFullYear() === inputDate.getFullYear() &&
-    today.getMonth() === inputDate.getMonth() &&
-    today.getDate() === inputDate.getDate()
-  );
-}
+// function isToday(dateStr) {
+//   const today = new Date();
+//   const inputDate = new Date(dateStr);
+//   return (
+//     today.getFullYear() === inputDate.getFullYear() &&
+//     today.getMonth() === inputDate.getMonth() &&
+//     today.getDate() === inputDate.getDate()
+//   );
+// }
 
 
 // ----------------- بارگذاری اولیه -----------------
